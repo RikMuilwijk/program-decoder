@@ -1,37 +1,63 @@
-function decodeSID() {
-    const input = document.getElementById('sidInput').value.trim();
-    const output = document.getElementById('output');
-    if (!input) {
-        output.innerHTML = "<p>Please enter a SID code.</p>";
-        return;
+let definitions = {};
+
+fetch('sid_definitions.json')
+  .then(response => response.json())
+  .then(data => definitions = data);
+
+function decodeCode() {
+  const code = document.getElementById('codeInput').value.trim();
+  displayDecodedInfo(code);
+}
+
+function scanImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  document.getElementById('ocrStatus').innerText = "Scanning image...";
+
+  Tesseract.recognize(
+    file,
+    'eng',
+    { logger: m => console.log(m) }
+  ).then(({ data: { text } }) => {
+    const extractedCode = text.match(/[A-Z]{2}\d{2}-[A-Za-z0-9]{3,}/);
+    if (extractedCode) {
+      document.getElementById('codeInput').value = extractedCode[0];
+      decodeCode();
+      document.getElementById('ocrStatus').innerText = "Code extracted: " + extractedCode[0];
+    } else {
+      document.getElementById('ocrStatus').innerText = "No valid SID code found.";
     }
+  });
+}
 
-    const parts = input.split('-');
-    if (parts.length < 2) {
-        output.innerHTML = "<p>Invalid SID code format.</p>";
-        return;
+function displayDecodedInfo(code) {
+  const output = document.getElementById('output');
+  output.innerHTML = "";
+
+  if (!code || code.length < 7) {
+    output.innerText = "Invalid SID code.";
+    return;
+  }
+
+  const parts = {
+    1: code[0],
+    2: code[1],
+    3: code[2],
+    4: code[3],
+    5: code[5],
+    6: code[6],
+    7: code[7],
+    8: code.length > 8 ? code[8] : "",
+    9: code.length > 9 ? code[9] : ""
+  };
+
+  for (let i = 1; i <= 9; i++) {
+    if (parts[i] && definitions[i] && definitions[i][parts[i]]) {
+      const info = definitions[i][parts[i]];
+      output.innerHTML += `<p><strong>Position ${i} (${parts[i]}):</strong> ${info}</p>`;
+    } else if (parts[i]) {
+      output.innerHTML += `<p><strong>Position ${i} (${parts[i]}):</strong> No definition found.</p>`;
     }
-
-    const prefix = parts[0];
-    const suffix = parts[1];
-    const extra = parts.length > 2 ? parts[2] : "";
-
-    let result = "<h2>Decoded SID Information</h2><ul>";
-
-    // Prefix positions
-    result += `<li><strong>Breeding Group:</strong> ${prefix[0] === 'E' ? 'EU' : prefix[0] === 'U' ? 'US' : 'Unknown'}</li>`;
-    result += `<li><strong>Season/Location:</strong> ${prefix[1]}</li>`;
-    result += `<li><strong>Harvest Year:</strong> 20${prefix.slice(2,4)}</li>`;
-
-    // Suffix positions
-    result += `<li><strong>Activity:</strong> ${suffix[0]}</li>`;
-    result += `<li><strong>Propagation Material:</strong> ${suffix[1]}</li>`;
-    result += `<li><strong>Generation/Material Type:</strong> ${suffix[2]}</li>`;
-
-    if (extra) {
-        result += `<li><strong>Running Number:</strong> ${extra}</li>`;
-    }
-
-    result += "</ul>";
-    output.innerHTML = result;
+  }
 }

@@ -1,0 +1,42 @@
+{
+  "position_1": {
+    "E": "EU group",
+    "U": "US group"
+  },
+  "position_2": {
+    "G": "Summer greenhouse",
+    "W": "Winter",
+    "S": "Summer",
+    "L": "Lab",
+    "F": "Field"
+  },
+  "position_3_4": "Last two digits of the harvest year (e.g., 25 for 2025)",
+  "position_5": {
+    "H": "Interpool hybrid crossing",
+    "1": "Mass selection",
+    "G": "Screening of putative monoploid TPS",
+    "R": "Mapping program",
+    "T": "Testcross program",
+    "Y": "Induction of tetraploid genotypes to diploid",
+    "P": "Pollen generation",
+    "U": "Unknown or undefined activity"
+  },
+  "position_6": {
+    "k": "Tuber",
+    "z": "Seedling",
+    "d": "Diploid",
+    "M": "Multiple materials",
+    "P": "Pollen (not considered propagation material)",
+    "T": "Tetraploid"
+  },
+  "position_7": {
+    "A": "Agronomy genotypes",
+    "3": "S3 generation",
+    "M": "Multiple generations",
+    "H": "Hybrid",
+    "T": "Tetraploid",
+    "z": "Seedling",
+    "R": "Resistant genotype"
+  },
+  "position_8_9": "Optional running number for distinguishing repeated programs (e.g., experiment code or pool)"
+}
