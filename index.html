@@ -1,24 +1,20 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>SID Program Code Decoder</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
+    <title>SID Code Decoder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input, button { font-size: 1em; margin: 5px 0; }
+        #output p { margin: 5px 0; }
+    </style>
 </head>
 <body>
-  <h1>SID Program Code Decoder</h1>
-  <input type="text" id="codeInput" placeholder="Enter SID code manually">
-  <button onclick="decodeCode()">Decode</button>
-
-  <h2>Or scan a label:</h2>
-  <input type="file" accept="image/*" capture="environment" onchange="scanImage(this)">
-  <p id="ocrStatus"></p>
-
-  <h2>Decoded Information:</h2>
-  <div id="output"></div>
-
-  <script src="script.js"></script>
+    <h2>SID Code Decoder</h2>
+    <input type="text" id="sidInput" placeholder="Enter SID code (e.g., EW25-HkA or EW25-HkA-P1)">
+    <button id="decodeBtn">Decode</button>
+    <div id="output"></div>
+    <script src="script.js"></script>
 </body>
 </html>
