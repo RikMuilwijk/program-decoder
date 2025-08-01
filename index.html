@@ -9,19 +9,16 @@
 <body>
   <h1>SID Program Decoder</h1>
   <div class="input-section">
-    <input type="text" id="sidInput" placeholder="Enter SID code (e.g., EW25-HkA-P1)" />
-    <button onclick="decodeSID()">Decode</button>
+    <input type="text" id="codeInput" placeholder="Enter SID code (e.g., EW25-HkA-P1)" />
+    <button onclick="decodeCode()">Decode</button>
+    <button onclick="startScan()">Start Scan</button>
   </div>
-
-  <div class="camera-section">
-    <video id="video" autoplay playsinline></video>
+  <div class="video-container">
+    <video id="video" autoplay playsinline muted></video>
     <canvas id="overlay"></canvas>
-    <button onclick="captureAndDecode()">Scan Label</button>
   </div>
-
   <div id="output"></div>
-
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
