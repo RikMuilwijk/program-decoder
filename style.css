@@ -1,23 +1,55 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    padding: 10px;
-    background-color: #f4f4f4;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #f4f4f4;
 }
+
 h1 {
-    color: #333;
+  text-align: center;
 }
-input {
-    padding: 8px;
-    width: 300px;
-    margin-right: 10px;
+
+.input-section {
+  text-align: center;
+  margin-bottom: 20px;
 }
+
+#sidInput {
+  width: 300px;
+  padding: 10px;
+  font-size: 16px;
+}
+
 button {
-    padding: 8px 12px;
+  padding: 10px 15px;
+  font-size: 16px;
+  margin-left: 10px;
 }
+
+.camera-section {
+  text-align: center;
+  position: relative;
+}
+
+#video {
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #ccc;
+}
+
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  pointer-events: none;
+}
+
 #output {
-    margin-top: 20px;
-    background: #fff;
-    padding: 15px;
-    border-radius: 5px;
+  margin-top: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 5px;
 }
