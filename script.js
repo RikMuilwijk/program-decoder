@@ -1,74 +1,103 @@
 let definitions = {};
-
 fetch('sid_definitions_complete.json')
   .then(response => response.json())
   .then(data => definitions = data);
 
-function decodeSID() {
-  const input = document.getElementById("sidInput").value.trim().toUpperCase();
+function decodeCode() {
+  const input = document.getElementById("codeInput").value.trim();
+  const formatted = formatSID(input);
+  const parts = parseSID(formatted);
+  displayInfo(parts);
+}
+
+function formatSID(code) {
+  const raw = code.replace(/[^a-zA-Z0-9]/g, '');
+  if (raw.length < 7) return raw;
+  let formatted = raw.slice(0, 4) + '-' + raw.slice(4, 7);
+  if (raw.length > 7) formatted += '-' + raw.slice(7);
+  return formatted;
+}
+
+function parseSID(code) {
+  const clean = code.replace(/-/g, '');
+  const parts = [];
+  for (let i = 0; i < clean.length; i++) {
+    parts.push({ position: i + 1, value: clean[i] });
+  }
+  if (clean.length > 7) {
+    parts.push({ position: 8, value: clean.slice(7, 8) });
+    parts.push({ position: 9, value: clean.slice(8) });
+  }
+  return parts;
+}
+
+function displayInfo(parts) {
   const output = document.getElementById("output");
-  output.innerHTML = "";
-
-  const match = input.match(/^([A-Z]{2})(\d{2})-([A-Z0-9]{3})(?:-([A-Z0-9]+))?$/);
-  if (!match) {
-    output.innerHTML = "<p>Invalid SID format. Expected format: EW25-HkA or EW25-HkA-P1</p>";
-    return;
-  }
-
-  const [_, prefix, year, mid, suffix] = match;
-  const chars = [...prefix, ...year, ...mid];
-  const parts = chars.map((char, i) => {
-    const key = "position_" + (i + 1);
-    const meaning = definitions[key]?.[char] || "Unknown";
-    return `<strong>Position ${i + 1} (${char}):</strong> ${meaning}`;
+  output.innerHTML = "<h3>Decoded Information:</h3>";
+  parts.forEach(p => {
+    const key = "position_" + p.position;
+    const def = definitions[key] && definitions[key][p.value.toUpperCase()] || "Unknown";
+    output.innerHTML += `<p><strong>Position ${p.position} (${p.value}):</strong> ${def}</p>`;
   });
-
-  if (suffix) {
-    parts.push(`<strong>Position 8-9 (${suffix}):</strong> ${definitions["position_8_9"]?.[suffix] || "Optional identifier or experiment code"}`);
-  }
-
-  output.innerHTML = parts.map(p => `<p>${p}</p>`).join("");
 }
 
-function captureAndDecode() {
-  const canvas = document.createElement("canvas");
+let videoStream = null;
+async function startScan() {
   const video = document.getElementById("video");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  const canvas = document.getElementById("overlay");
   const ctx = canvas.getContext("2d");
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-  Tesseract.recognize(canvas, 'eng').then(({ data: { text } }) => {
-    const match = text.match(/[A-Z]{2}\d{2}-[A-Z0-9]{3}(?:-[A-Z0-9]+)?/);
-    if (match) {
-      document.getElementById("sidInput").value = match[0];
-      decodeSID();
-    } else {
-      document.getElementById("output").innerHTML = "<p>No valid SID code found in scan.</p>";
-    }
-  });
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment",
+        width: { ideal: 640 },
+        height: { ideal: 480 }
+      },
+      audio: false
+    });
+    video.srcObject = videoStream;
+
+    video.onloadedmetadata = () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      drawOverlay();
+    };
+  } catch (err) {
+    alert("Camera access denied or not available.");
+  }
 }
 
-navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+function drawOverlay() {
+  const canvas = document.getElementById("overlay");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "red";
+  ctx.lineWidth = 3;
+  const w = canvas.width * 0.6;
+  const h = canvas.height * 0.2;
+  const x = (canvas.width - w) / 2;
+  const y = (canvas.height - h) / 2;
+  ctx.strokeRect(x, y, w, h);
+
+  setTimeout(() => captureAndRecognize(x, y, w, h), 2000);
+}
+
+function captureAndRecognize(x, y, w, h) {
   const video = document.getElementById("video");
-  video.srcObject = stream;
+  const tempCanvas = document.createElement("canvas");
+  tempCanvas.width = w;
+  tempCanvas.height = h;
+  const tempCtx = tempCanvas.getContext("2d");
+  tempCtx.drawImage(video, x, y, w, h, 0, 0, w, h);
 
-  const overlay = document.getElementById("overlay");
-  overlay.width = video.clientWidth;
-  overlay.height = video.clientHeight;
-  const ctx = overlay.getContext("2d");
-
-  function drawOverlay() {
-    ctx.clearRect(0, 0, overlay.width, overlay.height);
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 2;
-    const rectWidth = overlay.width * 0.8;
-    const rectHeight = 50;
-    const x = (overlay.width - rectWidth) / 2;
-    const y = (overlay.height - rectHeight) / 2;
-    ctx.strokeRect(x, y, rectWidth, rectHeight);
-    requestAnimationFrame(drawOverlay);
-  }
-
-  drawOverlay();
-});
+  Tesseract.recognize(tempCanvas, 'eng')
+    .then(result => {
+      const text = result.data.text.trim();
+      document.getElementById("codeInput").value = text;
+      decodeCode();
+    })
+    .catch(err => {
+      alert("OCR failed: " + err.message);
+    });
+}
